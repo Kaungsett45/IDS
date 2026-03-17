@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confusion Matrix - IDS</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-brand">🛡️ IDS Dashboard</div>
+        <div class="nav-links">
+            <a href="/">Home</a>
+            <a href="/live-demo">Live Demo</a>
+            <a href="/attack-info">Attack Info</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <header class="page-header">
+            <h1>📈 Confusion Matrix</h1>
+            <p>Detection accuracy for each attack type</p>
+        </header>
+
+        <div class="viz-navigation">
+            <a href="/confusion-matrix" class="nav-btn active">Confusion Matrix</a>
+            <a href="/attack-distribution" class="nav-btn">Attack Distribution</a>
+            <a href="/performance" class="nav-btn">Performance Metrics</a>
+        </div>
+
+        <div class="chart-container">
+            <div id="confusionMatrix"></div>
+        </div>
+
+        <div class="explanation-box">
+            <h3>📖 How to Read This Chart</h3>
+            <p><strong>Rows:</strong> Actual attack types in the dataset</p>
+            <p><strong>Columns:</strong> What the IDS predicted</p>
+            <p><strong>Diagonal (dark blue):</strong> Correct predictions</p>
+            <p><strong>Off-diagonal (lighter):</strong> Misclassifications</p>
+            <p><strong>Higher numbers on diagonal = Better accuracy</strong></p>
+        </div>
+    </div>
+
+    <script>
+        fetch('/api/confusion-matrix-data')
+            .then(response => response.json())
+            .then(data => {
+                // Create text annotations with dynamic color based on value
+                const maxVal = Math.max(...data.matrix.flat());
+                
+                const trace = {
+                    z: data.matrix,
+                    x: data.labels,
+                    y: data.labels,
+                    type: 'heatmap',
+                    colorscale: 'Blues',
+                    showscale: true,
+                    hovertemplate: 'Actual: %{y}<br>Predicted: %{x}<br>Count: %{z}<extra></extra>'
+                };
+
+                // Add text annotations for each cell
+                const annotations = [];
+                for (let i = 0; i < data.matrix.length; i++) {
+                    for (let j = 0; j < data.matrix[i].length; j++) {
+                        const value = data.matrix[i][j];
+                        // Use white text for dark cells, black for light cells
+                        const textColor = value > maxVal * 0.5 ? 'white' : 'black';
+                        annotations.push({
+                            x: data.labels[j],
+                            y: data.labels[i],
+                            text: value.toString(),
+                            font: {
+                                size: 16,
+                                color: textColor,
+                                family: 'Arial, sans-serif',
+                                weight: 'bold'
+                            },
+                            showarrow: false
+                        });
+                    }
+                }
+
+                const layout = {
+                    title: {
+                        text: 'Confusion Matrix - Attack Detection Accuracy',
+                        font: { size: 18, weight: 'bold' }
+                    },
+                    xaxis: { 
+                        title: 'Predicted Attack Type', 
+                        side: 'bottom',
+                        tickfont: { size: 13, weight: 'bold' }
+                    },
+                    yaxis: { 
+                        title: 'Actual Attack Type', 
+                        autorange: 'reversed',
+                        tickfont: { size: 13, weight: 'bold' }
+                    },
+                    annotations: annotations,
+                    width: 800,
+                    height: 700,
+                    font: { size: 12 }
+                };
+
+                Plotly.newPlot('confusionMatrix', [trace], layout);
+            });
+    </script>
+</body>
+</html>

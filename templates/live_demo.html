@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Demo - IDS</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-brand">IDS Dashboard</div>
+        <div class="nav-links">
+            <a href="/">Home</a>
+            <a href="/live-demo" class="active">Live Demo</a>
+            <a href="/attack-info">Attack Info</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <header class="page-header">
+            <h1>Live Attack Detection Demo</h1>
+            <p>Watch the IDS detect attacks in real-time</p>
+        </header>
+
+        <div class="demo-controls">
+            <div class="control-group">
+                <label for="attackSelect">Select Attack Type to Test:</label>
+                <select id="attackSelect" class="attack-select">
+                    <option value="Normal">Normal Traffic</option>
+                    <option value="DoS">DoS (Denial of Service)</option>
+                    <option value="Probe">Probe (Network Scanning)</option>
+                    <option value="R2L">R2L (Remote to Local)</option>
+                    <option value="U2R">U2R (User to Root)</option>
+                </select>
+            </div>
+            <button id="detectBtn" class="btn-primary">Detect Selected Attack</button>
+            <button id="randomBtn" class="btn-secondary">Detect Random Attack</button>
+        </div>
+
+        <div class="demo-result" id="demoResult" style="display: none;">
+            <div class="result-header">
+                <h2>Detection Result</h2>
+                <span id="resultStatus" class="status-badge"></span>
+            </div>
+
+            <div class="result-grid">
+                <div class="result-section">
+                    <h3>Network Traffic Features</h3>
+                    <div id="features" class="feature-list"></div>
+                </div>
+
+                <div class="result-section">
+                    <h3>Detection Analysis</h3>
+                    <div class="detection-info">
+                        <div class="info-row">
+                            <span class="label">Actual Attack:</span>
+                            <span id="actualAttack" class="value"></span>
+                        </div>
+                        <div class="info-row">
+                            <span class="label">Detected As:</span>
+                            <span id="detectedAttack" class="value-large"></span>
+                        </div>
+                        <div class="info-row">
+                            <span class="label">Confidence:</span>
+                            <span id="confidence" class="value-large"></span>
+                        </div>
+                        <div class="info-row">
+                            <span class="label">Description:</span>
+                            <span id="description" class="value"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="probability-section">
+                <h3>Detection Probabilities</h3>
+                <div id="probabilities" class="probability-bars"></div>
+            </div>
+
+            <div id="actionBox" class="action-box"></div>
+        </div>
+    </div>
+
+    <script>
+        const detectBtn = document.getElementById('detectBtn');
+        const randomBtn = document.getElementById('randomBtn');
+
+        detectBtn.addEventListener('click', () => detectAttack(false));
+        randomBtn.addEventListener('click', () => detectAttack(true));
+
+        function detectAttack(isRandom = false) {
+            const btn = isRandom ? randomBtn : detectBtn;
+            btn.disabled = true;
+            btn.textContent = 'Detecting...';
+
+            const selectedAttack = isRandom ? 'random' : document.getElementById('attackSelect').value;
+
+            fetch('/api/detect', { 
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ attack_type: selectedAttack })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Detection result:', data);
+                if (data.success) {
+                    displayResult(data);
+                } else {
+                    alert('Error: ' + (data.error || 'Unknown error'));
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Failed to detect attack. Please check console for details.');
+            })
+            .finally(() => {
+                btn.disabled = false;
+                btn.textContent = isRandom ? 'Detect Random Attack' : 'Detect Selected Attack';
+            });
+        }
+
+        function displayResult(data) {
+            document.getElementById('demoResult').style.display = 'block';
+
+            const statusBadge = document.getElementById('resultStatus');
+            if (data.is_correct) {
+                statusBadge.textContent = 'Correctly Detected';
+                statusBadge.className = 'status-badge success';
+            } else {
+                statusBadge.textContent = 'Misclassified';
+                statusBadge.className = 'status-badge warning';
+            }
+
+            const featuresHtml = Object.entries(data.features)
+                .map(([key, value]) => `
+                    <div class="feature-item">
+                        <span class="feature-name">${key}:</span>
+                        <span class="feature-value">${value}</span>
+                    </div>
+                `).join('');
+            document.getElementById('features').innerHTML = featuresHtml;
+
+            document.getElementById('actualAttack').textContent = `${data.actual_attack} (${data.actual_category})`;
+            document.getElementById('detectedAttack').textContent = data.detected_attack;
+            document.getElementById('detectedAttack').className = `value-large attack-${data.detected_attack.toLowerCase()}`;
+            document.getElementById('confidence').textContent = data.confidence.toFixed(2) + '%';
+            document.getElementById('description').textContent = data.description;
+
+            const probHtml = Object.entries(data.all_probabilities)
+                .sort((a, b) => b[1] - a[1])
+                .map(([attack, prob]) => `
+                    <div class="prob-item">
+                        <div class="prob-label">${attack}</div>
+                        <div class="prob-bar-container">
+                            <div class="prob-bar attack-${attack.toLowerCase()}" style="width: ${prob}%; background: ${getAttackColor(attack)}"></div>
+                            <span class="prob-value">${prob.toFixed(2)}%</span>
+                        </div>
+                    </div>
+                `).join('');
+            document.getElementById('probabilities').innerHTML = probHtml;
+
+            const actionBox = document.getElementById('actionBox');
+            let actionHtml = '<h3>Recommended Action</h3>';
+            
+            switch(data.detected_attack) {
+                case 'Normal':
+                    actionHtml += '<p class="action-normal">No action needed. Traffic is legitimate.</p>';
+                    break;
+                case 'DoS':
+                    actionHtml += '<p class="action-critical">ALERT! Block source IP immediately. Increase bandwidth capacity.</p>';
+                    break;
+                case 'Probe':
+                    actionHtml += '<p class="action-warning">WARNING! Monitor closely. Strengthen firewall rules.</p>';
+                    break;
+                case 'R2L':
+                    actionHtml += '<p class="action-critical">CRITICAL! Block access immediately. Check for data breach.</p>';
+                    break;
+                case 'U2R':
+                    actionHtml += '<p class="action-critical">CRITICAL! Isolate system immediately. Full investigation required.</p>';
+                    break;
+            }
+            actionBox.innerHTML = actionHtml;
+
+            document.getElementById('demoResult').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        function getAttackColor(attack) {
+            const colors = {
+                'Normal': '#27ae60',
+                'DoS': '#e74c3c',
+                'Probe': '#f39c12',
+                'R2L': '#9b59b6',
+                'U2R': '#e67e22'
+            };
+            return colors[attack] || '#3498db';
+        }
+
+
+    </script>
+</body>
+</html>

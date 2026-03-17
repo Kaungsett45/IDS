@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attack Information - IDS</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-brand">IDS Dashboard</div>
+        <div class="nav-links">
+            <a href="/">Home</a>
+            <a href="/live-demo">Live Demo</a>
+            <a href="/attack-info" class="active">Attack Info</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <header class="page-header">
+            <h1>Attack Type Information</h1>
+            <p>Detailed explanation of each attack category</p>
+        </header>
+
+        <div class="attack-details">
+            <div class="attack-detail-card normal-card">
+                <div class="attack-header">
+                    <h2>Normal Traffic</h2>
+                    <span class="risk-badge low">Risk: NONE</span>
+                </div>
+                <div class="attack-body">
+                    <p><strong>What it is:</strong> Legitimate network activity from authorized users and systems.</p>
+                    <p><strong>Characteristics:</strong></p>
+                    <ul>
+                        <li>Regular connection patterns</li>
+                        <li>Expected data transfer volumes</li>
+                        <li>Authorized protocols and services</li>
+                    </ul>
+                    <p><strong>Action Required:</strong> None - Continue monitoring</p>
+                    <p><strong>Real-world Example:</strong> Employee accessing company email, browsing approved websites</p>
+                </div>
+            </div>
+
+            <div class="attack-detail-card dos-card">
+                <div class="attack-header">
+                    <h2>DoS (Denial of Service)</h2>
+                    <span class="risk-badge high">Risk: HIGH (8/10)</span>
+                </div>
+                <div class="attack-body">
+                    <p><strong>What it is:</strong> Attacker overwhelms system resources to make services unavailable.</p>
+                    <p><strong>Attack Examples:</strong></p>
+                    <ul>
+                        <li><strong>Neptune:</strong> SYN flood attack</li>
+                        <li><strong>Smurf:</strong> ICMP flood using amplification</li>
+                        <li><strong>Back:</strong> Apache web server attack</li>
+                        <li><strong>Teardrop:</strong> Fragmented packet attack</li>
+                    </ul>
+                    <p><strong>Action Required:</strong></p>
+                    <ul>
+                        <li>Block source IP addresses immediately</li>
+                        <li>Increase bandwidth capacity</li>
+                        <li>Enable DDoS protection services</li>
+                        <li>Alert security team</li>
+                    </ul>
+                    <p><strong>Real-world Impact:</strong> Website crashes, services become unavailable, revenue loss</p>
+                </div>
+            </div>
+
+            <div class="attack-detail-card probe-card">
+                <div class="attack-header">
+                    <h2>Probe (Scanning)</h2>
+                    <span class="risk-badge medium">Risk: MEDIUM (6/10)</span>
+                </div>
+                <div class="attack-body">
+                    <p><strong>What it is:</strong> Attacker scans network to gather information about vulnerabilities.</p>
+                    <p><strong>Attack Examples:</strong></p>
+                    <ul>
+                        <li><strong>Nmap:</strong> Network mapping tool</li>
+                        <li><strong>Portsweep:</strong> Scanning multiple ports</li>
+                        <li><strong>Ipsweep:</strong> Scanning multiple IP addresses</li>
+                        <li><strong>Satan:</strong> Security analysis tool</li>
+                    </ul>
+                    <p><strong>Action Required:</strong></p>
+                    <ul>
+                        <li>Monitor source closely</li>
+                        <li>Strengthen firewall rules</li>
+                        <li>Log all scanning attempts</li>
+                        <li>Investigate source identity</li>
+                    </ul>
+                    <p><strong>Real-world Impact:</strong> Reconnaissance for future attacks, vulnerability discovery</p>
+                </div>
+            </div>
+
+            <div class="attack-detail-card r2l-card">
+                <div class="attack-header">
+                    <h2>R2L (Remote to Local)</h2>
+                    <span class="risk-badge critical">Risk: CRITICAL (9/10)</span>
+                </div>
+                <div class="attack-body">
+                    <p><strong>What it is:</strong> Unauthorized access attempt from a remote machine to local system.</p>
+                    <p><strong>Attack Examples:</strong></p>
+                    <ul>
+                        <li><strong>Guess_passwd:</strong> Password guessing attack</li>
+                        <li><strong>FTP_write:</strong> Unauthorized FTP write access</li>
+                        <li><strong>Imap:</strong> Email server exploitation</li>
+                        <li><strong>Phf:</strong> CGI script vulnerability</li>
+                    </ul>
+                    <p><strong>Action Required:</strong></p>
+                    <ul>
+                        <li>Block access immediately</li>
+                        <li>Force password resets</li>
+                        <li>Check for data breach</li>
+                        <li>Audit all access logs</li>
+                        <li>Enable multi-factor authentication</li>
+                    </ul>
+                    <p><strong>Real-world Impact:</strong> Data theft, unauthorized access, credential compromise</p>
+                </div>
+            </div>
+
+            <div class="attack-detail-card u2r-card">
+                <div class="attack-header">
+                    <h2>U2R (User to Root)</h2>
+                    <span class="risk-badge critical">Risk: CRITICAL (10/10)</span>
+                </div>
+                <div class="attack-body">
+                    <p><strong>What it is:</strong> Attacker escalates privileges from normal user to administrator/root.</p>
+                    <p><strong>Attack Examples:</strong></p>
+                    <ul>
+                        <li><strong>Buffer_overflow:</strong> Memory corruption exploit</li>
+                        <li><strong>Rootkit:</strong> Malicious software for root access</li>
+                        <li><strong>Loadmodule:</strong> Kernel module loading exploit</li>
+                        <li><strong>Perl:</strong> Script-based privilege escalation</li>
+                    </ul>
+                    <p><strong>Action Required:</strong></p>
+                    <ul>
+                        <li>ISOLATE SYSTEM IMMEDIATELY</li>
+                        <li>Disconnect from network</li>
+                        <li>Full forensic investigation</li>
+                        <li>Preserve evidence</li>
+                        <li>System rebuild may be required</li>
+                        <li>Contact incident response team</li>
+                    </ul>
+                    <p><strong>Real-world Impact:</strong> Complete system compromise, data destruction, backdoor installation</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

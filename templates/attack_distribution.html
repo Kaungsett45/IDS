@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attack Distribution - IDS</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-brand">🛡️ IDS Dashboard</div>
+        <div class="nav-links">
+            <a href="/">Home</a>
+            <a href="/live-demo">Live Demo</a>
+            <a href="/attack-info">Attack Info</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <header class="page-header">
+            <h1>📊 Attack Distribution</h1>
+            <p>Frequency of different attacks in the dataset</p>
+        </header>
+
+        <div class="viz-navigation">
+            <a href="/confusion-matrix" class="nav-btn">Confusion Matrix</a>
+            <a href="/attack-distribution" class="nav-btn active">Attack Distribution</a>
+            <a href="/performance" class="nav-btn">Performance Metrics</a>
+        </div>
+
+        <div class="chart-container">
+            <div id="attackDistribution"></div>
+        </div>
+
+        <div class="explanation-box">
+            <h3>📖 What This Shows</h3>
+            <p><strong>DoS attacks</strong> are the most common in the dataset</p>
+            <p><strong>Normal traffic</strong> represents legitimate network activity</p>
+            <p><strong>U2R attacks</strong> are rare but extremely dangerous</p>
+            <p><strong>Imbalanced data</strong> makes detecting rare attacks more challenging</p>
+        </div>
+    </div>
+
+    <script>
+        fetch('/api/attack-distribution-data')
+            .then(response => response.json())
+            .then(data => {
+                const colors = {
+                    'Normal': '#2ecc71',
+                    'DoS': '#e74c3c',
+                    'Probe': '#f39c12',
+                    'R2L': '#9b59b6',
+                    'U2R': '#e67e22'
+                };
+
+                const barColors = data.labels.map(label => colors[label] || '#3498db');
+
+                const trace = {
+                    x: data.labels,
+                    y: data.counts,
+                    type: 'bar',
+                    marker: { color: barColors },
+                    text: data.counts,
+                    textposition: 'outside',
+                    textfont: { size: 14 }
+                };
+
+                const layout = {
+                    title: 'Attack Type Distribution in Test Dataset',
+                    xaxis: { title: 'Attack Category' },
+                    yaxis: { title: 'Number of Samples' },
+                    width: 900,
+                    height: 600,
+                    showlegend: false
+                };
+
+                Plotly.newPlot('attackDistribution', [trace], layout);
+            });
+    </script>
+</body>
+</html>

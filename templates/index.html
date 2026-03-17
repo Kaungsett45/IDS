@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IDS - Intrusion Detection System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-brand">IDS Dashboard</div>
+        <div class="nav-links">
+            <a href="/" class="active">Home</a>
+            <a href="/live-demo">Live Demo</a>
+            <a href="/attack-info">Attack Info</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <header class="hero">
+            <h1>Intrusion Detection System</h1>
+            <p>Real-time Network Attack Detection & Analysis</p>
+        </header>
+
+        <div class="stats-grid" id="statsGrid">
+            <div class="stat-card">
+                <div class="stat-value" id="accuracy">--</div>
+                <div class="stat-label">Overall Accuracy</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="totalSamples">--</div>
+                <div class="stat-label">Total Samples</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">5</div>
+                <div class="stat-label">Attack Types</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">Real-time</div>
+                <div class="stat-label">Detection Speed</div>
+            </div>
+        </div>
+
+        <div class="visualization-grid">
+            <a href="/confusion-matrix" class="viz-card">
+                <h3>Confusion Matrix</h3>
+                <p>View detection accuracy for each attack type</p>
+            </a>
+
+            <a href="/attack-distribution" class="viz-card">
+                <h3>Attack Distribution</h3>
+                <p>See frequency of different attacks in dataset</p>
+            </a>
+
+            <a href="/performance" class="viz-card">
+                <h3>Performance Metrics</h3>
+                <p>Detailed model evaluation and accuracy analysis</p>
+            </a>
+
+            <a href="/live-demo" class="viz-card highlight">
+                <h3>Live Detection Demo</h3>
+                <p>Watch real-time attack detection in action</p>
+            </a>
+        </div>
+
+        <div class="attack-types">
+            <h2>Attack Types Detected</h2>
+            <div class="attack-grid">
+                <div class="attack-card normal">
+                    <h3>Normal</h3>
+                    <p>Legitimate traffic</p>
+                    <span class="risk-badge low">Risk: None</span>
+                </div>
+                <div class="attack-card dos">
+                    <h3>DoS</h3>
+                    <p>Denial of Service</p>
+                    <span class="risk-badge high">Risk: HIGH</span>
+                </div>
+                <div class="attack-card probe">
+                    <h3>Probe</h3>
+                    <p>Network Scanning</p>
+                    <span class="risk-badge medium">Risk: MEDIUM</span>
+                </div>
+                <div class="attack-card r2l">
+                    <h3>R2L</h3>
+                    <p>Remote to Local</p>
+                    <span class="risk-badge critical">Risk: CRITICAL</span>
+                </div>
+                <div class="attack-card u2r">
+                    <h3>U2R</h3>
+                    <p>User to Root</p>
+                    <span class="risk-badge critical">Risk: CRITICAL</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        fetch('/api/stats')
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('accuracy').textContent = data.overall_accuracy.toFixed(2) + '%';
+                document.getElementById('totalSamples').textContent = data.total_samples.toLocaleString();
+            })
+            .catch(error => {
+                console.error('Error loading stats:', error);
+                document.getElementById('accuracy').textContent = 'Error';
+                document.getElementById('totalSamples').textContent = 'Error';
+            });
+    </script>
+</body>
+</html>

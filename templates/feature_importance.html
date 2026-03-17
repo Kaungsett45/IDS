@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feature Importance - IDS</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-brand">🛡️ IDS Dashboard</div>
+        <div class="nav-links">
+            <a href="/">Home</a>
+            <a href="/live-demo">Live Demo</a>
+            <a href="/attack-info">Attack Info</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <header class="page-header">
+            <h1>🔍 Feature Importance</h1>
+            <p>Which network features are most important for detection</p>
+        </header>
+
+        <div class="viz-navigation">
+            <a href="/confusion-matrix" class="nav-btn">Confusion Matrix</a>
+            <a href="/attack-distribution" class="nav-btn">Attack Distribution</a>
+            <a href="/feature-importance" class="nav-btn active">Feature Importance</a>
+        </div>
+
+        <div class="chart-container">
+            <div id="featureImportance"></div>
+        </div>
+
+        <div class="explanation-box">
+            <h3>📖 Understanding Feature Importance</h3>
+            <p><strong>Higher values:</strong> More important for detecting attacks</p>
+            <p><strong>src_bytes:</strong> Amount of data sent from source</p>
+            <p><strong>dst_bytes:</strong> Amount of data sent to destination</p>
+            <p><strong>count:</strong> Number of connections to same host</p>
+            <p><strong>These features</strong> help the AI distinguish normal traffic from attacks</p>
+        </div>
+    </div>
+
+    <script>
+        fetch('/api/feature-importance-data')
+            .then(response => response.json())
+            .then(data => {
+                const trace = {
+                    y: data.features.reverse(),
+                    x: data.importance.reverse(),
+                    type: 'bar',
+                    orientation: 'h',
+                    marker: { color: '#3498db' },
+                    text: data.importance.reverse().map(v => v.toFixed(4)),
+                    textposition: 'outside'
+                };
+
+                const layout = {
+                    title: 'Top 15 Most Important Features for Attack Detection',
+                    xaxis: { title: 'Importance Score' },
+                    yaxis: { title: 'Network Feature' },
+                    width: 900,
+                    height: 700,
+                    margin: { l: 150 }
+                };
+
+                Plotly.newPlot('featureImportance', [trace], layout);
+            });
+    </script>
+</body>
+</html>

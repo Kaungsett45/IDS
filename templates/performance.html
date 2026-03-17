@@ -1,0 +1,178 @@
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Model Performance - IDS</title>
+            <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+        </head>
+        <body>
+            <nav class="navbar">
+                <div class="nav-brand">🛡️ IDS Dashboard</div>
+                <div class="nav-links">
+                    <a href="/">Home</a>
+                    <a href="/live-demo">Live Demo</a>
+                    <a href="/performance" class="active">Performance</a>
+                    <a href="/attack-info">Attack Info</a>
+                </div>
+            </nav>
+
+            <div class="container">
+                <header class="page-header">
+                    <h1>📊 Model Performance Metrics</h1>
+                    <p>Comprehensive evaluation of detection accuracy and speed</p>
+                </header>
+
+                <div class="viz-navigation">
+                    <a href="/confusion-matrix" class="nav-btn">Confusion Matrix</a>
+                    <a href="/attack-distribution" class="nav-btn">Attack Distribution</a>
+                    <a href="/performance" class="nav-btn active">Performance Metrics</a>
+                </div>
+
+                <div id="loading" class="loading">
+                    <h3>⏳ Calculating performance metrics...</h3>
+                    <p>This may take a few seconds</p>
+                </div>
+
+                <div id="content" style="display: none;">
+                    <!-- Key Metrics Cards -->
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-value" id="overallAccuracy">--</div>
+                            <div class="stat-label">Overall Accuracy</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="detectionSpeed">--</div>
+                            <div class="stat-label">Detection Speed</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="throughput">--</div>
+                            <div class="stat-label">Samples/Second</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="totalSamples">--</div>
+                            <div class="stat-label">Total Predictions</div>
+                        </div>
+                    </div>
+
+                    <!-- Per-Class Performance Table -->
+                    <div class="explanation-box">
+                        <h3>📈 Per-Class Performance Breakdown</h3>
+                        <p>Detailed metrics for each attack type showing precision and recall</p>
+                        
+                        <div style="overflow-x: auto; margin-top: 1.5rem;">
+                            <table class="performance-table">
+                                <thead>
+                                    <tr>
+                                        <th>Attack Type</th>
+                                        <th>Precision</th>
+                                        <th>Recall</th>
+                                        <th>Samples</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="metricsTable">
+                                    <!-- Populated by JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+              
+
+                        <!-- Confusion Matrix Structure Table -->
+                        <div style="margin-top: 2.5rem;">
+                            <h4 style="color: #2c3e50; margin-bottom: 1rem;">Error Analysis:</h4>
+                            <table class="confusion-structure-table">
+                                <thead>
+                                    <tr>
+                                        <th class="empty-cell"></th>
+                                        <th class="predicted-attack">Correct</th>
+                                        <th class="predicted-normal">Wrong</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <th class="actual-attack">All Classes</th>
+                                        <td class="tp-cell">
+                                            <strong>True Positive (TP)</strong>
+                                            <div class="metric-value" id="tpValue">--</div>
+                                            <span>Correctly classified</span>
+                                        </td>
+                                        <td class="fn-cell">
+                                            <strong>False Negative (FN)</strong>
+                                            <div class="metric-value" id="fnValue">--</div>
+                                            <span>Misclassified</span>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                   
+                
+                </div>
+            </div>
+
+            <script>
+                // Fetch overall stats
+                fetch('/api/stats')
+                    .then(response => response.json())
+                    .then(data => {
+                        document.getElementById('overallAccuracy').textContent = data.overall_accuracy.toFixed(2) + '%';
+                        document.getElementById('totalSamples').textContent = data.total_samples.toLocaleString();
+                    });
+
+                // Fetch performance metrics
+                fetch('/api/performance-metrics')
+                    .then(response => response.json())
+                    .then(data => {
+                        // Hide loading, show content
+                        document.getElementById('loading').style.display = 'none';
+                        document.getElementById('content').style.display = 'block';
+
+                        // Update speed metrics
+                        document.getElementById('detectionSpeed').textContent = data.detection_speed_ms.toFixed(2) + ' ms';
+                        document.getElementById('throughput').textContent = Math.round(data.throughput) + ' /sec';
+
+                        // Populate metrics table
+                        const tableBody = document.getElementById('metricsTable');
+                        data.class_metrics.forEach(metric => {
+                            const row = document.createElement('tr');
+                            row.innerHTML = `
+                                <td class="attack-name attack-${metric.attack_type.toLowerCase()}">${metric.attack_type}</td>
+                                <td>${metric.precision.toFixed(2)}%</td>
+                                <td>${metric.recall.toFixed(2)}%</td>
+                                <td>${metric.support.toLocaleString()}</td>
+                            `;
+                            tableBody.appendChild(row);
+                        });
+
+                        // Update confusion matrix table values (only TP and FN)
+                        document.getElementById('tpValue').textContent = data.true_positives.toLocaleString();
+                        document.getElementById('fnValue').textContent = data.false_negatives.toLocaleString();
+
+                        // Populate confused pairs
+                        const confusedList = document.getElementById('confusedPairs');
+                        if (data.confused_pairs.length > 0) {
+                            data.confused_pairs.forEach(pair => {
+                                const item = document.createElement('div');
+                                item.className = 'confused-item';
+                                item.innerHTML = `
+                                    <span class="confused-actual">${pair.actual}</span>
+                                    <span class="confused-arrow">→</span>
+                                    <span class="confused-predicted">${pair.predicted}</span>
+                                    <span class="confused-count">${pair.count} cases</span>
+                                `;
+                                confusedList.appendChild(item);
+                            });
+                        } else {
+                            confusedList.innerHTML = '<p>No significant confusion detected</p>';
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error loading performance metrics:', error);
+                        document.getElementById('loading').innerHTML = '<h3 style="color: #e74c3c;">Error loading metrics</h3>';
+                    });
+            </script>
+        </body>
+        </html>

@@ -1,6 +1,6 @@
 #  Intrusion Detection System (IDS) - Network Attack Detection
 
-## 📖 What This Project Does
+##  What This Project Does
 
 This Intrusion Detection System analyzes network traffic and identifies **5 different types** of cyber attacks in real-time. It helps understand **which attack is happening** and **what action to take**.
 
@@ -189,7 +189,6 @@ Detection System/
 
 ### Model: Ensemble (XGBoost + LightGBM)
 - **XGBoost**: 60% weight - Gradient boosting for high accuracy
-- **LightGBM**: 40% weight - Fast, efficient gradient boosting
 - **Ensemble Method**: Soft voting (probability averaging)
 - **Class Imbalance Handling**: SMOTE (Synthetic Minority Over-sampling)
 - **Training Time**: ~3-4 minutes on 125,973 samples
@@ -212,52 +211,17 @@ Detection System/
 
 ---
 
-## 💡 Presentation Tips
-
-### For Non-Technical Audience:
-- Focus on attack descriptions and real-world impact
-- Use the visual charts (confusion matrix, bar graphs)
-- Show live detection demo with clear explanations
-- Emphasize the "what action to take" for each attack
-
-### For Technical Audience:
-- Discuss model selection (Random Forest)
-- Explain feature engineering
-- Show accuracy metrics and confusion matrix
-- Discuss challenges (imbalanced dataset for U2R)
 
 ---
 
-## 🎯 Demo Script
-
-1. **Introduction** (2 min)
-   - Show the 5 attack types
-   - Explain why IDS is important
-
-2. **Dataset Overview** (3 min)
-   - Show NSL-KDD statistics
-   - Explain what features mean
-
-3. **Live Detection** (5 min)
-   - Run `demo_detection.py`
-   - Show detection for each attack type
-   - Explain confidence scores
-
-4. **Results Analysis** (5 min)
-   - Show confusion matrix
-   - Discuss accuracy per attack type
-   - Show feature importance
-
-5. **Q&A** (5 min)
 
 ---
 
-## 🏆 Why This Project Stands Out
+##  Why This Project Stands Out
 
 ✅ **Clear Attack Classification** - Each attack is labeled and explained  
 ✅ **Visual Presentation** - Charts and graphs for easy understanding  
 ✅ **Real-World Dataset** - Industry-standard NSL-KDD  
-✅ **High Accuracy** - 95%+ overall detection rate  
 ✅ **Actionable Insights** - Tells you what to do for each attack  
 ✅ **Live Demonstration** - Shows real-time detection  
 
@@ -271,12 +235,10 @@ Detection System/
 
 ---
 
-## 🤝 Credits
+##  Credits
 
 - **Dataset**: NSL-KDD (Canadian Institute for Cybersecurity)
 - **Model**: Scikit-learn Random Forest
-- **Visualization**: Matplotlib & Seaborn
 
 ---
 
-**Made with ❤️ for Cybersecurity Education**
